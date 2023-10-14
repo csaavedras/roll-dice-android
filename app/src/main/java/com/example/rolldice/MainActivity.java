@@ -2,9 +2,13 @@ package com.example.rolldice;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+
 
 import java.util.Random;
 
@@ -34,9 +38,21 @@ public class MainActivity extends AppCompatActivity {
         Random random = new Random();
         int randomNumberDice1 = random.nextInt(6) + 1;
         int randomNumberDice2 = random.nextInt(6) + 1;
-        setImageResource(imageDice1, randomNumberDice1);
-        setImageResource(imageDice2, randomNumberDice2);
+
+        Animation rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_animation);
+
+        imageDice1.startAnimation(rotateAnimation);
+        imageDice2.startAnimation(rotateAnimation);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setImageResource(imageDice1, randomNumberDice1);
+                setImageResource(imageDice2, randomNumberDice2);
+            }
+        }, 1000);
     }
+
 
     private void setImageResource(ImageView imageView, int diceValue) {
         int[] diceImages = {
