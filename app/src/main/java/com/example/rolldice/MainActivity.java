@@ -1,8 +1,12 @@
 package com.example.rolldice;
 
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -12,9 +16,13 @@ import android.view.animation.AnimationUtils;
 
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ShakeDetector.OnShakeListener {
     private ImageView imageDice1;
     private ImageView imageDice2;
+
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private ShakeDetector mShakeDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +40,36 @@ public class MainActivity extends AppCompatActivity {
                 rollDices();
             }
         });
+
+        // ShakeDetector initialization
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mShakeDetector = new ShakeDetector();
+        mShakeDetector.setOnShakeListener(this);
     }
 
-    private void rollDices() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Register the Sensor Manager Listener onResume
+        mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    public void onPause() {
+        // Unregister the Sensor Manager Listener onPause
+        mSensorManager.unregisterListener(mShakeDetector);
+        super.onPause();
+    }
+
+    @Override
+    public void onShake(int count) {
+        rollDices();
+    }
+
+    @Override
+    public void rollDices() {
         Random random = new Random();
         int randomNumberDice1 = random.nextInt(6) + 1;
         int randomNumberDice2 = random.nextInt(6) + 1;
@@ -53,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
         }, 1000);
     }
 
-
     private void setImageResource(ImageView imageView, int diceValue) {
         int[] diceImages = {
                 R.drawable.dice1,
@@ -69,4 +103,5 @@ public class MainActivity extends AppCompatActivity {
             imageView.setImageResource(diceImages[index]);
         }
     }
+
 }
